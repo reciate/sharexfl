@@ -1,5 +1,5 @@
 import random,string
-from flask import Flask, request
+from flask import Flask, request, send_from_directory
 app = Flask(__name__)
 
 def genRandomString(length):
@@ -11,3 +11,7 @@ def upload():
 	filename = '{}.png'.format(genRandomString(6))
 	image.save('u/{}'.format(filename))
 	return '{}u/{}'.format(request.url_root, filename)
+	
+@app.route('/u/<image>', methods=['GET'])
+def u(image):
+	return send_from_directory('u', image)
