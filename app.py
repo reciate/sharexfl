@@ -9,8 +9,11 @@ def genRandomString(length):
 
 @app.route('/up', methods=['POST'])
 def upload():
-	if request.form['key'] not in keys:
-		return 'Your key is invalid!', 401
+	try:
+		if request.form['key'] not in keys:
+			return 'Your key is invalid!', 401
+	except:
+		return 'You must supply a key!', 401
 	image = request.files['image']
 	filename = '{}.png'.format(genRandomString(6))
 	image.save('u/{}'.format(filename))
