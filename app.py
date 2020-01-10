@@ -42,6 +42,10 @@ def upload():
 	image = request.files['image']
 	filename = '{}.png'.format(genRandomString(6))
 	image.save('u/{}'.format(filename))
+	db = get_db()
+	cursor = db.cursor()
+	cursor.execute("INSERT INTO uploads (key, image) VALUES (?,?)", (request.form['key'], filename))
+	db.commit()
 	return '{}u/{}'.format(request.url_root, filename), 200
 	
 @app.route('/u/<image>', methods=['GET'])
