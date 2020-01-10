@@ -57,12 +57,12 @@ def upload():
 def u(image):
 	return send_from_directory('u', image), 200
 	
-@app.route('/db', methods=['GET'])
-def db():
+@app.route('/db/<table>', methods=['GET'])
+def db(table):
 	cursor = get_db().cursor()
-	cursor.execute("SELECT * FROM keys")
-	data = cursor.fetchall()
-	return ' '.join(str(x) for x in data)
+	cursor.execute("SELECT * FROM {}".format(table))
+	results = ' '.join(str(x) for x in cursor.fetchall())
+	return results
 	
 with app.app_context():
 	initdb()
