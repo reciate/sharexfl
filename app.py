@@ -16,7 +16,7 @@ def initdb():
 	cursor = db.cursor()
 	cursor.execute("CREATE TABLE IF NOT EXISTS keys(name text NOT NULL, key text NOT NULL, admin boolean NOT NULL, unique (name, key))")
 	cursor.execute("CREATE TABLE IF NOT EXISTS uploads(key text NOT NULL, image text NOT NULL)")
-	cursor.execute("INSERT OR IGNORE INTO keys (name, key, admin) VALUES (?,?,?)", ('Admin', 'Admin', True))
+	cursor.execute("INSERT OR IGNORE INTO keys (name, key, admin) VALUES (?,?,?)", ('Admin', 'CHANGEME', True))
 	db.commit()
 	
 def keySearch(key):
@@ -25,6 +25,11 @@ def keySearch(key):
 	if cursor.fetchone() is not None:
 		return True
 	return False
+	
+def getUsername(key):
+	cursor = get_db().cursor()
+	cursor.execute("SELECT * FROM keys WHERE key=?", (key,))
+	return cursor.fetchone()[0]
 
 @app.teardown_appcontext
 def close_connection(exception):
@@ -44,7 +49,7 @@ def upload():
 	image.save('u/{}'.format(filename))
 	db = get_db()
 	cursor = db.cursor()
-	cursor.execute("INSERT INTO uploads (key, image) VALUES (?,?)", (request.form['key'], filename))
+	cursor.execute("INSERT INTO uploads (key, image) VALUES (?,?)", (getUsername(request.form['key']), filename))
 	db.commit()
 	return '{}u/{}'.format(request.url_root, filename), 200
 	
