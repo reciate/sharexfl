@@ -3,5 +3,10 @@
 		<title>{{name}}'s Gallery</title>
 	</head>
 	<body>
+		{% for image in images %}
+		<a href="/u/{{image[1]}}" target="BLANK">
+			<img src="/u/{{image[1]}}" height="100" width="100">
+		</a>
+		{% endfor %}
 	</body>
 </html>
