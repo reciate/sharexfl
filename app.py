@@ -1,5 +1,5 @@
 import random,string,sqlite3
-from flask import Flask, request, send_from_directory,g,render_template
+from flask import Flask, request, send_from_directory,g,render_template,abort
 app = Flask(__name__)
 
 def genRandomString(length):
@@ -67,7 +67,7 @@ def gallery(key):
 	if name:
 		return render_template('gallery.html', name=name)
 	else:
-		return 404
+		return abort(404)
 	
 @app.route('/u/<image>', methods=['GET'])
 def u(image):
