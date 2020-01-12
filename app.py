@@ -1,5 +1,5 @@
 import random,string,sqlite3
-from flask import Flask, request, send_from_directory,g
+from flask import Flask, request, send_from_directory,g,render_template
 app = Flask(__name__)
 
 def genRandomString(length):
@@ -29,7 +29,11 @@ def keySearch(key):
 def getUsername(key):
 	cursor = get_db().cursor()
 	cursor.execute("SELECT * FROM keys WHERE key=?", (key,))
-	return cursor.fetchone()[0]
+	result = cursor.fetchone()
+	if result:
+		return result[0]
+	else:
+		return None
 
 @app.teardown_appcontext
 def close_connection(exception):
@@ -52,6 +56,10 @@ def upload():
 	cursor.execute("INSERT INTO uploads (key, image) VALUES (?,?)", (getUsername(request.form['key']), filename))
 	db.commit()
 	return '{}u/{}'.format(request.url_root, filename), 200
+	
+@app.route('/gallery/<key>', methods=['GET'])
+def gallery(key):
+	return render_template('gallery.html', username=getUsername(key))
 	
 @app.route('/u/<image>', methods=['GET'])
 def u(image):
