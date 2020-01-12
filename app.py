@@ -15,7 +15,7 @@ def initdb():
 	db = get_db()
 	cursor = db.cursor()
 	cursor.execute("CREATE TABLE IF NOT EXISTS keys(name text NOT NULL, key text NOT NULL, admin boolean NOT NULL, unique (name, key))")
-	cursor.execute("CREATE TABLE IF NOT EXISTS uploads(key text NOT NULL, image text NOT NULL)")
+	cursor.execute("CREATE TABLE IF NOT EXISTS uploads(name text NOT NULL, image text NOT NULL)")
 	cursor.execute("INSERT OR IGNORE INTO keys (name, key, admin) VALUES (?,?,?)", ('Admin', 'CHANGEME', True))
 	db.commit()
 	
@@ -38,6 +38,7 @@ def getName(key):
 def getImages(name):
 	cursor = get_db().cursor()
 	cursor.execute("SELECT * FROM uploads WHERE name=?", (name,))
+	return cursor.fetchall()
 
 @app.teardown_appcontext
 def close_connection(exception):
@@ -57,7 +58,7 @@ def upload():
 	image.save('u/{}'.format(filename))
 	db = get_db()
 	cursor = db.cursor()
-	cursor.execute("INSERT INTO uploads (key, image) VALUES (?,?)", (getName(request.form['key']), filename))
+	cursor.execute("INSERT INTO uploads (name, image) VALUES (?,?)", (getName(request.form['key']), filename))
 	db.commit()
 	return '{}u/{}'.format(request.url_root, filename), 200
 	
@@ -65,9 +66,8 @@ def upload():
 def gallery(key):
 	name=getName(key)
 	if name:
-		return render_template('gallery.html', name=name)
-	else:
-		return abort(404)
+		return render_template('gallery.html', name=name, images=getImages(name))
+	return abort(404)
 	
 @app.route('/u/<image>', methods=['GET'])
 def u(image):
