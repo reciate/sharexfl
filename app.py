@@ -26,7 +26,7 @@ def keySearch(key):
 		return True
 	return False
 	
-def getUsername(key):
+def getName(key):
 	cursor = get_db().cursor()
 	cursor.execute("SELECT * FROM keys WHERE key=?", (key,))
 	result = cursor.fetchone()
@@ -34,6 +34,10 @@ def getUsername(key):
 		return result[0]
 	else:
 		return None
+		
+def getImages(name):
+	cursor = get_db().cursor()
+	cursor.execute("SELECT * FROM uploads WHERE name=?", (name,))
 
 @app.teardown_appcontext
 def close_connection(exception):
@@ -53,13 +57,17 @@ def upload():
 	image.save('u/{}'.format(filename))
 	db = get_db()
 	cursor = db.cursor()
-	cursor.execute("INSERT INTO uploads (key, image) VALUES (?,?)", (getUsername(request.form['key']), filename))
+	cursor.execute("INSERT INTO uploads (key, image) VALUES (?,?)", (getName(request.form['key']), filename))
 	db.commit()
 	return '{}u/{}'.format(request.url_root, filename), 200
 	
 @app.route('/gallery/<key>', methods=['GET'])
 def gallery(key):
-	return render_template('gallery.html', username=getUsername(key))
+	name=getName(key)
+	if name:
+		return render_template('gallery.html', name=name)
+	else:
+		return 404
 	
 @app.route('/u/<image>', methods=['GET'])
 def u(image):
