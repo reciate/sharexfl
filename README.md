@@ -4,7 +4,10 @@ A simple flask app to manage ShareX uploads.
 ### Current Features
 * Allow uploads
 * Token authentication
-
-### Planned Features
 * User-based gallery
 * Management panel
+
+### Planned Features
+* Better login system
+* Sustained login
+* CSS because everything is ugly
