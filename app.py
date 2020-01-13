@@ -62,12 +62,13 @@ def upload():
 	db.commit()
 	return '{}u/{}'.format(request.url_root, filename), 200
 	
-@app.route('/gallery/<key>', methods=['GET'])
-def gallery(key):
-	name=getName(key)
-	if name:
-		return render_template('gallery.html', name=name, images=getImages(name))
-	return abort(404)
+@app.route('/gallery', methods=['GET', 'POST'])
+def login():
+	if request.method == "POST":
+		if keySearch(request.form['key']):
+			name=getName(request.form['key'])
+			return render_template('gallery.html', name=name, images=getImages(name))
+	return render_template('login.html'), 200
 	
 @app.route('/u/<image>', methods=['GET'])
 def u(image):
