@@ -39,6 +39,16 @@ def getImages(name):
 	cursor = get_db().cursor()
 	cursor.execute("SELECT * FROM uploads WHERE name=?", (name,))
 	return cursor.fetchall()
+	
+def isAdmin(key):
+	cursor = get_db().cursor()
+	cursor.execute("SELECT * FROM keys where key=?", (key,))
+	result = cursor.fetchone()
+	if result:
+		if result[2] == 1:
+			return True
+		return False
+	return None
 
 @app.teardown_appcontext
 def close_connection(exception):
@@ -64,12 +74,42 @@ def upload():
 	
 @app.route('/gallery', methods=['GET', 'POST'])
 def login():
-	if request.method == "POST":
+	if request.method == 'POST':
 		if keySearch(request.form['key']):
 			name=getName(request.form['key'])
 			return render_template('gallery.html', name=name, images=getImages(name))
 	return render_template('login.html'), 200
 	
+@app.route('/admin', methods=['GET', 'POST'])
+def admin():
+	if request.method == 'POST' and isAdmin(request.form['key']):
+		return render_template('admin.html', key=request.form['key']), 200
+	return render_template('login.html'), 200
+	
+@app.route('/adduser', methods=['POST'])
+def adduser():
+	if isAdmin(request.form['adminKey']):
+		if request.form['admin']:
+			admin=True
+		else:
+			admin=False
+		db = get_db()
+		cursor = db.cursor()
+		cursor.execute("INSERT OR IGNORE INTO keys (name, key, admin) VALUES (?,?,?)", (request.form['name'], request.form['key'], admin))
+		db.commit()
+		return '{} added successfully!'.format(request.form['name']), 200
+	abort(404)
+	
+@app.route('/edituser', methods=['POST'])
+def edituser():
+	if isAdmin(request.form['adminKey']):
+		db = get_db()
+		cursor = db.cursor()
+		cursor.execute("UPDATE keys SET key = ? WHERE name = ?", (request.form['key'], request.form['name']))
+		db.commit()
+		return '{} edited successfully!'.format(request.form['name']), 200
+	abort(404)
+
 @app.route('/u/<image>', methods=['GET'])
 def u(image):
 	return send_from_directory('u', image), 200
