@@ -11,3 +11,4 @@ A simple flask app to manage ShareX uploads.
 * Better login system
 * Sustained login
 * CSS because everything is ugly
+* A full rewrite due to garbage code
